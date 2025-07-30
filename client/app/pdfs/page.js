@@ -39,7 +39,7 @@ export default function Page() {
     try {
       setShow(query);
       const res = await fetch(
-        `http://localhost:8000/chat?message=${query} &&collectionName=${collections[selectedIndex].name}`
+        `${process.env.NEXT_PUBLIC_HOST_SERVER}/chat?message=${query} &&collectionName=${collections[selectedIndex].name}`
       );
       const data = await res.json();
       // console.log(data);
@@ -61,14 +61,14 @@ export default function Page() {
         description: data?.answer || "Sample answer placeholder",
       });
 
-      await fetch("http://localhost:3000/api/update-collection", {
+      await fetch("/api/update-collection", {
         method: "POST",
         headers: myHeaders,
         body: raw,
       });
 
       const coldata = await fetch(
-        "http://localhost:3000/api/update-collection",
+        "/api/update-collection",
         {
           method: "POST",
           headers: myHeaders,
@@ -95,7 +95,7 @@ export default function Page() {
     const load = async () => {
       try {
         const res = await fetch(
-          `http://localhost:3000/api/collection?col_name=${collections[selectedIndex].name}`
+          `/api/collection?col_name=${collections[selectedIndex].name}`
         );
         const data = await res.json();
         setChats(data.chats);
@@ -342,7 +342,7 @@ export default function Page() {
             <>
               {show.length > 0 && (
                 <div className="flex justify-end mb-4">
-                  <div className="max-w-[70%] bg-slate-300 text-left text-black p-3 rounded-l-2xl rounded-tr-2xl text-sm lg:text-base">
+                  <div className="max-w-[70%] bg-slate-300 text-left text-black p-3 rounded-l-2xl rounded-tr-2xl text-sm lg:text-lg">
                     {show}
                   </div>
                 </div>
@@ -433,7 +433,7 @@ export default function Page() {
                 collections[selectedIndex].query_limit
             }
             onClick={handleQuery}
-            className="absolute bottom-2 cursor-pointer lg:bottom-10 right-[7%] lg:right-[20%]"
+            className="absolute bottom-2 cursor-pointer lg:bottom-11 right-[7%] lg:right-[20%]"
           >
             {!isQuerying ? (
               <svg

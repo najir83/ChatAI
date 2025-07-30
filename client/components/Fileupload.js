@@ -4,7 +4,7 @@ import { toast, Bounce } from "react-toastify";
 
 import useStore from "@/lib/store";
 import { useUser } from "@clerk/nextjs";
-
+console.log("host ",process.env.NEXT_PUBLIC_HOST_SERVER);
 const Fileupload = () => {
   const { collections, setCollection, baseUser, setBaseUser } = useStore();
   const { user, isLoaded } = useUser();
@@ -46,10 +46,13 @@ const Fileupload = () => {
             formData.append("pdf", file);
             formData.append("collectionName", colName);
 
-            const uploadRes = await fetch("http://localhost:8000/upload/pdf", {
-              method: "POST",
-              body: formData,
-            });
+            const uploadRes = await fetch(
+              `${process.env.NEXT_PUBLIC_HOST_SERVER}/upload/pdf`,
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
 
             const data2 = await uploadRes.json();
             // console.log(data2);
