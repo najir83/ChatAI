@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="bg-white/10 backdrop-blur-md  text-white py-4 px-6 h-[6vh] ">
       <div className="  flex  md:flex-row justify-between items-center gap-4 text-sm">
         <Link href="/" className="lg:text-lg font-bold">
-          Chat<span className="text-green-800">AI</span>
+          {"<"}Chat<span className="text-green-800">AI {"/>"}</span>
         </Link>
         {/* Rights */}
         <div className="text-center">

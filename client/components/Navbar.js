@@ -12,13 +12,14 @@ import { usePathname } from "next/navigation";
 import { EllipsisVertical, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import useStore from "@/lib/store";
 function Navbar() {
   const pathname = usePathname();
   const { user } = useUser();
 
-  const [showNav, setShowNav] = useState(false);
+  // const [] = useState(fal  se);
   const [isMobile, setIsMobile] = useState(false);
-
+  const { showItems, setShowItems,showNav, setShowNav } = useStore();
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 720);
     handleResize();
@@ -40,14 +41,18 @@ function Navbar() {
           {isMobile && (
             <EllipsisVertical
               className="cursor-pointer transition-transform hover:scale-110"
-              onClick={() => setShowNav(true)}
+              onClick={() => {
+
+                if(showItems)setShowItems(false)
+                
+                setShowNav(true)}}
             />
           )}
           <Link
             href="/"
             className="text-xl lg:text-2xl font-bold ml-3 hover:text-green-800 transition-colors"
           >
-            Chat<span className="text-green-800">AI</span>
+           {"<"} Chat<span className="text-green-800">AI {"/>"}</span>
           </Link>
         </div>
 
@@ -57,8 +62,10 @@ function Navbar() {
               <Link
                 key={path}
                 href={path}
-                className={`px-5 py-3 rounded-2xl hover:bg-gray-200 transition font-semibold ${
-                  pathname === path ? "text-black bg-gray-200" : "text-gray-600"
+                className={`px-5 py-3  hover:border-b-5 border-white transition font-semibold ${
+                  pathname === path
+                    ? "text-black rounded-2xl bg-gray-200"
+                    : "text-gray-600"
                 }`}
               >
                 {label}
@@ -86,7 +93,7 @@ function Navbar() {
       </div>
 
       {/* Mobile Sidebar */}
-      
+
       <AnimatePresence>
         {showNav && (
           <motion.div
@@ -94,7 +101,7 @@ function Navbar() {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed top-0 left-0 w-[85%] h-screen bg-amber-50 shadow-2xl  p-6 flex flex-col space-y-2"
+            className="fixed top-0 left-0 w-[85%] h-screen z-10 bg-amber-50 shadow-2xl  p-6 flex flex-col space-y-2"
           >
             <motion.div
               initial={{ rotate: 90 }}
@@ -120,7 +127,6 @@ function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-     
     </nav>
   );
 }

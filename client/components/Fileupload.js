@@ -1,14 +1,28 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Upload } from "lucide-react";
 import { toast, Bounce } from "react-toastify";
 
 import useStore from "@/lib/store";
 import { useUser } from "@clerk/nextjs";
-console.log("host ",process.env.NEXT_PUBLIC_HOST_SERVER);
+
+// import { Player } from "@lottiefiles/react-lottie-player";
+import Lottie from "lottie-react";
+import animationData from "@/public/animation.json";
+
+// console.log("host ",process.env.NEXT_PUBLIC_HOST_SERVER);
 const Fileupload = () => {
   const { collections, setCollection, baseUser, setBaseUser } = useStore();
   const { user, isLoaded } = useUser();
   const [colName, setColName] = useState("");
+
+const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 720);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const [isUploading, setIsUploading] = useState(false);
 
@@ -126,7 +140,15 @@ const Fileupload = () => {
   };
 
   return isUploading ? (
-    <p>Loading....</p>
+    <div className="text-right text-gray-500 p-2 text-xs">
+   
+      <Lottie
+        animationData={animationData}
+        loop={true}
+        style={{ height: isMobile ? 130: 160, width: isMobile ? 390:500 }}
+      />
+      <span className="font-bold">AI</span> is working - It may takes some time
+</div>
   ) : (
     <div className="  rounded-2xl space-x-5 flex lg:h-40  lg:shadow-lg hover:shadow-green-400  text-sm justify-center items-center p-4   ">
       <div>

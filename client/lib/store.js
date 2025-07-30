@@ -1,9 +1,18 @@
 import { create } from "zustand";
 const useStore = create((set, get) => ({
-  baseUser:null,
-  collections:[],
+  baseUser: null,
+  showItems: false,
+  showNav: false,
+  collections: [],
 
-  setBaseUser: async (u) => {
+  setShowItems: (i) => {
+    set({ showItems: i });
+  },
+
+  setShowNav: (i) => {
+    set({ showNav: i });
+  },
+  setBaseUser: (u) => {
     set({ baseUser: u });
   },
   setCollection: async (u) => {

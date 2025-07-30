@@ -3,13 +3,24 @@
 import Fileupload from "@/components/Fileupload";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Sparkles, Plus, X } from "lucide-react";
+import { Sparkles, Plus, X, ChevronUp } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { toast, Bounce } from "react-toastify";
 import useStore from "@/lib/store";
+import Lottie from "lottie-react";
+import animationData from "@/public/Loading.json";
 
 export default function Page() {
-  const { collections, setCollection, baseUser, setBaseUser } = useStore();
+  const {
+    collections,
+    setCollection,
+    baseUser,
+    setBaseUser,
+    showItems,
+    setShowItems,
+    showNav,
+    setShowNav,
+  } = useStore();
   const template = useRef();
   const [query, setQuery] = useState("");
   const [isQuerying, setIsQuerying] = useState(false);
@@ -67,14 +78,11 @@ export default function Page() {
         body: raw,
       });
 
-      const coldata = await fetch(
-        "/api/update-collection",
-        {
-          method: "POST",
-          headers: myHeaders,
-          body: raw2,
-        }
-      );
+      const coldata = await fetch("/api/update-collection", {
+        method: "POST",
+        headers: myHeaders,
+        body: raw2,
+      });
 
       const newcol = await coldata.json();
       let updated = collections.map((e) =>
@@ -131,6 +139,7 @@ export default function Page() {
         });
 
         const data = await res.json();
+        // console.log("data",data);
         setBaseUser(data.user);
         setCollection(data.collections);
       } catch (e) {
@@ -146,6 +155,7 @@ export default function Page() {
       load();
     }
   }, [isLoaded]);
+
   useEffect(() => {
     template.current?.scrollIntoView({ behavior: "smooth" });
   }, [showChats]);
@@ -154,13 +164,17 @@ export default function Page() {
     setShow("");
   }, [selectedIndex]);
   const [showup, setShowUp] = useState(false);
+  // const [] = useState(false);
+  const [selectColls, setSelectedCols] = useState("");
+
   // console.log(isMobile);
+
   return (
     <div className="lg:h-[86vh] lg:w-full flex flex-col lg:flex-row">
       {/* Left side: Upload */}
       <div className="lg:w-[30vw] flex justify-center  border-r  border-gray-300 ">
         {isLoaded && baseUser ? (
-          <div className="w-full px-4 transition-all delay-500 py-6 space-y-6">
+          <div className="w-full px-4 transition-all delay-500 pt-6 space-y-0">
             {isMobile && !showup && (
               <Plus
                 onClick={() => setShowUp(true)}
@@ -177,10 +191,10 @@ export default function Page() {
               <>
                 <div className="text-left border-b pb-3">
                   <p className="font-semibold text-gray-800 text-lg">
-                    {baseUser.name}
+                    {baseUser?.name}
                   </p>
                   <p className="text-sm text-gray-500 capitalize">
-                    Role: {baseUser.role}
+                    Role: {baseUser?.role}
                   </p>
                 </div>
 
@@ -190,19 +204,19 @@ export default function Page() {
                     <p className="mb-2 text-sm font-medium text-gray-700">
                       Collections Created:
                       <span className="font-semibold mx-1">
-                        {baseUser.createdCollection}
+                        {baseUser?.createdCollection}
                       </span>
                       /
                       <span className="font-semibold mx-1">
-                        {baseUser.collectionLimit}
+                        {baseUser?.collectionLimit}
                       </span>
                     </p>
 
                     <div className="w-full h-4 bg-gray-200 rounded-full">
                       <div
                         className={`h-full ${
-                          (baseUser.createdCollection /
-                            baseUser.collectionLimit) *
+                          (baseUser?.createdCollection /
+                            baseUser?.collectionLimit) *
                             100 >=
                           60
                             ? "bg-red-500"
@@ -210,8 +224,8 @@ export default function Page() {
                         }  rounded-full transition-all duration-300`}
                         style={{
                           width: `${
-                            (baseUser.createdCollection /
-                              baseUser.collectionLimit) *
+                            (baseUser?.createdCollection /
+                              baseUser?.collectionLimit) *
                             100
                           }%`,
                         }}
@@ -219,7 +233,8 @@ export default function Page() {
                     </div>
                   </div>
 
-                  {baseUser.createdCollection === baseUser.collectionLimit && (
+                  {baseUser?.createdCollection ===
+                    baseUser?.collectionLimit && (
                     <p className="text-red-500 mt-1 font-medium text-sm">
                       🚫 You have reached your collection limit.
                     </p>
@@ -229,7 +244,7 @@ export default function Page() {
                 {/* File Upload */}
                 <div
                   hidden={
-                    baseUser.createdCollection === baseUser.collectionLimit
+                    baseUser?.createdCollection === baseUser?.collectionLimit
                   }
                   className="border border-gray-200 rounded-md p-2"
                 >
@@ -241,34 +256,54 @@ export default function Page() {
 
             {/* Collections Dropdown */}
             <div className="mt-2">
-              <label className="block mb-1 text-sm font-medium text-gray-700">
+              <div className="block lg:text-lg text-md font-medium text-gray-700">
                 Your Collections
-              </label>
-              <select
-                className=" lg:w-[12vw]    border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500"
-                onChange={(e) => {
-                  setSelectedIndex(parseInt(e.target.value));
+              </div>
+              <div
+                onClick={() => {
+                  if (showNav) setShowNav(false);
+                  setShowItems(!showItems);
                 }}
-                value={selectedIndex}
+                className={`flex overflow-auto lg:max-w-[20vw] capitalize ${
+                  showItems && "border-1"
+                }  justify-between hover:border-1 bg-gray-200 gap-4 px-3 py-2 min-w-[160] cursor-pointer hover:bg-gray-300`}
               >
-                <option value="" disabled>
-                  -- Select a collection --
-                </option>
+                {selectColls.length == 0 ? (
+                  <div className="">-- Select a Collection --</div>
+                ) : (
+                  <div>{selectColls}</div>
+                )}{" "}
+                <ChevronUp />
+              </div>
 
-                {collections.map((col, i) => {
-                  const isLimitReached = col.used_query >= col.query_limit;
-                  return (
-                    <option
-                      key={col._id || i}
-                      value={i}
-                      // disabled={isLimitReached}
-                    >
-                      {col.name} ----- ({col.used_query}/{col.query_limit})
-                      {isLimitReached ? " - Limit Reached" : ""}
-                    </option>
-                  );
-                })}
-              </select>
+              {showItems && (
+                <div className="border-1 absolute border-t-0 px-3 py-2 z-0 bg-gray-200 overflow-auto lg:max-w-[20vw] lg:max-h-[30vh] w-[92vw]">
+                  {collections.map((col, i) => {
+                    const isLimitReached = col.used_query >= col.query_limit;
+                    return (
+                      <div
+                        key={col._id || i}
+                        value={i}
+                        // disabled={isLimitReached}
+                        className="flex  "
+                        onClick={() => {
+                          setSelectedCols(col.name);
+                          setSelectedIndex(i);
+                          setShowItems(false);
+                        }}
+                      >
+                        <div className="flex  gap-4 px-3 py-2 w-full  cursor-pointer hover:bg-gray-300">
+                          <p className="capitalize">{col.name}</p>
+                          <p className="text-red-400">
+                            {isLimitReached ? " - Limit Reached" : ""}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              {/* </select> */}
 
               {/* Note about disabled options */}
               {collections?.some(
@@ -285,8 +320,15 @@ export default function Page() {
             </div>
           </div>
         ) : (
-          <div className="text-center text-gray-500 p-4">
-            Loading user info...
+          <div className="flex items-center opacity-35 fl p-4">
+            <Lottie
+              animationData={animationData}
+              loop={true}
+              style={{
+                height: isMobile ? 100 : 300,
+                width: isMobile ? 200 : 300,
+              }}
+            />
           </div>
         )}
       </div>
@@ -294,7 +336,7 @@ export default function Page() {
       {/* Right side: QnA */}
       <div className="lg:w-[70vw] flex flex-col justify-between p-4">
         {/* Answer display */}
-        <div>
+        <div className="flex justify-between">
           <button
             onClick={() => {
               setShowChats(!showChats);
@@ -303,11 +345,21 @@ export default function Page() {
           >
             {showChats ? "hide" : "show"} chats
           </button>
+          {selectedIndex != -1 && collections && (
+            <div>
+              <div className="text-sm text-gray-600">
+                chat-limits : {collections[selectedIndex]?.used_query}/
+                {collections[selectedIndex]?.query_limit}{" "}
+              </div>
+              <div className="text-xs text-gray-500 text-right">resets weekly</div>
+            </div>
+          )}
         </div>
         <div className="border border-gray-200 rounded-xl shadow p-4 lg:h-[77vh] h-[60vh] overflow-y-auto">
           {!answer && !isQuerying && !showChats && (
-            <h1 className="lg:absolute lg:top-100 ml-10  mt-30 lg:ml-0 lg:mt-0 lg:right-130 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500 text-3xl font-bold">
-              Unleash the Power of ChatAI
+            <h1 className="lg:absolute flex flex-col items-center justify-center lg:top-100 lg:ml-30    mt-30  lg:mt-0 lg:right-130 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500 lg:text-3xl text-2xl font-bold">
+              <div>Think Smarter,</div>
+              <div>Talk Better—with ChatAI</div>
             </h1>
           )}
           {showChats && (
@@ -433,7 +485,7 @@ export default function Page() {
                 collections[selectedIndex].query_limit
             }
             onClick={handleQuery}
-            className="absolute bottom-2 cursor-pointer lg:bottom-11 right-[7%] lg:right-[20%]"
+            className="absolute bottom-0 cursor-pointer lg:bottom-10 right-[7%] lg:right-[20%]"
           >
             {!isQuerying ? (
               <svg
