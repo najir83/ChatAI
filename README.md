@@ -9,10 +9,10 @@ ChatAI is a full-stack Retrieval-Augmented Generation (RAG) system that enables 
 
 ---
 ## 📸 Preview
-- Home Page 1
-![Chatme UI Screenshot](Home.png) 
-- Home Page 2
-![Chatme UI Screenshot](Chat.png) 
+- Home Page 
+![ChatAI UI Screenshot](Home.png) 
+- PDFs and Chat
+![ChatAI UI Screenshot](Chat.png) 
 
 
 ## ✨ Features
