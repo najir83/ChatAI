@@ -9,6 +9,7 @@ import { toast, Bounce } from "react-toastify";
 import useStore from "@/lib/store";
 import Lottie from "lottie-react";
 import animationData from "@/public/Loading.json";
+import animationData2 from "@/public/Spinner.json";
 
 export default function Page() {
   const {
@@ -28,7 +29,7 @@ export default function Page() {
   const [referance, SetReferance] = useState(null);
   const [show, setShow] = useState("");
   const { user, isLoaded } = useUser();
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const [showChats, setShowChats] = useState(false);
   const [chats, setChats] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
@@ -351,7 +352,9 @@ export default function Page() {
                 chat-limits : {collections[selectedIndex]?.used_query}/
                 {collections[selectedIndex]?.query_limit}{" "}
               </div>
-              <div className="text-xs text-gray-500 text-right">resets weekly</div>
+              <div className="text-xs text-gray-500 text-right">
+                resets weekly
+              </div>
             </div>
           )}
         </div>
@@ -401,7 +404,7 @@ export default function Page() {
               )}
 
               {/* Answer area */}
-              <div className="flex items-start gap-2 lg:text-lg text-left p-2 relative">
+              <div className="flex items-start gap-2 lg:text-lg text-left p-2">
                 {isQuerying && (
                   <div className="animate-pulse text-gray-500 flex items-center gap-2">
                     <Sparkles className="animate-spin-slow" />
@@ -449,8 +452,17 @@ export default function Page() {
         </div>
 
         {/* Input box */}
-        <div className="lg:relative flex justify-center items-center mt-4 lg:h-[8vh]">
+        <div
+          className={`relative ${
+            showNav && "opacity-0"
+          }  transition-all duration-700 flex justify-center items-center mt-4 lg:h-[8vh]`}
+        >
           <input
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleQuery();
+              }
+            }}
             onClick={() => {
               if (selectedIndex === -1) {
                 toast.info("Please select an collection for QnA", {
@@ -473,9 +485,8 @@ export default function Page() {
               setQuery(e.target.value);
             }}
             placeholder="Ask something from the PDF..."
-            className="border border-gray-300 rounded-2xl   px-4 py-2 lg:w-[60%] w-[95%] lg:text-lg focus:outline-none focus:ring-2 pr-10 mb-10 lg:pr-12 focus:ring-indigo-500  "
+            className="border border-gray-300 rounded-2xl   px-4 py-2 lg:w-[60%] w-[95%] lg:text-lg focus:outline-none focus:ring-2 pr-10 mb-10 lg:pr-11 focus:ring-indigo-500  "
           />
-
           {/* used_query >= col.query_limit */}
           <button
             hidden={
@@ -485,7 +496,7 @@ export default function Page() {
                 collections[selectedIndex].query_limit
             }
             onClick={handleQuery}
-            className="absolute bottom-0 cursor-pointer lg:bottom-10 right-[7%] lg:right-[20%]"
+            className="absolute top-2 cursor-pointer lg:top-0   right-[4%] lg:right-[20%]"
           >
             {!isQuerying ? (
               <svg
@@ -500,26 +511,14 @@ export default function Page() {
                 <path d="M48 448l416-192L48 64v149.333L346 256 48 298.667z"></path>
               </svg>
             ) : (
-              <svg
-                className="w-6 h-6 animate-spin text-indigo-600 mr-2"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                ></path>
-              </svg>
+              <Lottie
+              animationData={animationData2}
+              loop={true}
+              style={{
+                height: isMobile ? 25 : 35,
+                width: isMobile ? 25 : 35,
+              }}
+            />
             )}
           </button>
         </div>
