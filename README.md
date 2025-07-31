@@ -5,7 +5,7 @@ ChatAI is a full-stack Retrieval-Augmented Generation (RAG) system that enables 
 
 ---
 
-🔗 **Live Demo:** [https://yourapp.vercel.app/]
+🔗 **Live Demo:** [https://jahir.vercel.app/]
 
 ---
 ## 📸 Preview
