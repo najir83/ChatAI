@@ -11,6 +11,7 @@ import animationData from "@/public/Loading.json";
 export default function Page() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [loadingdata, setLoadingData] = useState(true);
 
   const [isMobile, setIsMobile] = useState(false);
 
@@ -63,6 +64,8 @@ export default function Page() {
           autoClose: 2500,
           transition: Bounce,
         });
+      } finally {
+        setLoadingData(false);
       }
     };
 
@@ -167,7 +170,7 @@ export default function Page() {
     setLoading(false);
   };
 
-  return !isLoaded ? (
+  return (!isLoaded && loadingdata) ? (
     <div className="h-[86vh] flex items-center justify-center opacity-35  p-4">
       <Lottie
         animationData={animationData}
@@ -201,7 +204,7 @@ export default function Page() {
           </li>
           <li className="flex items-center gap-2">
             <CheckCircle2 className="text-white" size={18} />
-            <strong>10 queries</strong> per PDF <strong>per day</strong>
+            <strong>15 queries</strong> per PDF <strong>per day</strong>
           </li>
           <li className="flex items-center gap-2">
             <CheckCircle2 className="text-white" size={18} />

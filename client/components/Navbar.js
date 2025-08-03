@@ -81,7 +81,7 @@ const router=useRouter();
           }}
 
              onClick={()=>router.push('/payments')}
-            className="lg:px-6 lg:py-2 font-bold cursor-pointer bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full shadow-md hover:from-blue-600 hover:to-indigo-600 transition-all duration-200"
+            className="lg:px-6 lg:py-2 px-4 py-1 font-bold cursor-pointer bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full shadow-md hover:from-blue-600 hover:to-indigo-600 transition-all duration-200"
           >
             Join Now
           </motion.button>

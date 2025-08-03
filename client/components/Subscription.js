@@ -85,7 +85,7 @@ export default function SubscriptionSection() {
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="text-white" size={18} />
-                <strong>10 queries</strong> per PDF <strong>per day</strong>
+                <strong>15 queries</strong> per PDF <strong>per day</strong>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="text-white" size={18} />
