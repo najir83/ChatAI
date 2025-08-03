@@ -43,7 +43,7 @@ export default function Page() {
         const data = await res.json();
         // console.log("data", data);
         if (data.user?.role === "subscribedUser") {
-          toast.warn("You have already took the subscription", {
+          toast.warn("You're Already a Premium Member!", {
             position: "top-right",
             autoClose: 2500,
             hideProgressBar: false,
