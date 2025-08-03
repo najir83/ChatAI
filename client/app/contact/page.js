@@ -4,7 +4,7 @@ import { Mail, Phone, MapPin } from "lucide-react";
 
 import React, { useState } from "react";
 import { toast, Bounce } from "react-toastify";
-
+import {motion} from 'motion/react'
 export default function ContactPage() {
   const [form, setForm] = useState({
     name: "",
@@ -66,13 +66,13 @@ export default function ContactPage() {
       <div className="max-w-5xl w-full grid gap-10 lg:grid-cols-2">
         {/* Left: Contact Info */}
         <div className="space-y-6">
-          <h2 className="text-3xl font-bold text-indigo-700">Get in Touch</h2>
-          <p className="text-gray-600">
+          <motion.h2 initial={{opacity:0,y:30}} whileInView={{opacity:1,y:0}} transition={{duration:.6}} className="text-3xl font-bold text-indigo-700">Get in Touch</motion.h2>
+          <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{duration:.6}} className="text-gray-600">
             Have a question, feedback, or just want to say hello? We'd love to
             hear from you.
-          </p>
+          </motion.p>
 
-          <div className="space-y-4">
+          <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{duration:.6}} className="space-y-4">
             <div className="flex items-start gap-3">
               <Mail className="text-indigo-600" />
               <span className="text-gray-700">support@chataiapp.com</span>
@@ -85,11 +85,11 @@ export default function ContactPage() {
               <MapPin className="text-indigo-600" />
               <span className="text-gray-700">Jalpaiguri, India</span>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Right: Contact Form */}
-        <form
+        <motion.form initial={{opacity:0,y:30}} whileInView={{opacity:1,y:0}} transition={{duration:.6}}
           onSubmit={handleSubmit}
           className="bg-white p-6 rounded-lg shadow-md space-y-5"
         >
@@ -148,7 +148,7 @@ export default function ContactPage() {
           >
             {sending ? "Sending..." : "Send Message"}
           </button>
-        </form>
+        </motion.form>
       </div>
     </div>
   );

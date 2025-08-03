@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
   },
   collectionLimit: {
     type: Number,
-    default: 5,
+    default: 3,
   },
   createdCollection: {
     type: Number,

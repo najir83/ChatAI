@@ -1,0 +1,169 @@
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast, Bounce } from "react-toastify";
+import useStore from "@/lib/store";
+import { useUser } from "@clerk/nextjs";
+import Lottie from "lottie-react";
+
+export default function RazorpayButton() {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { setUpgrade } = useStore();
+
+  const { user, isLoaded } = useUser();
+  const [baseUser, setBaseUser] = useState();
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+
+        const raw = JSON.stringify({
+          clerk_id: user?.id,
+          name: user?.fullName,
+        });
+
+        const res = await fetch("/api/user", {
+          method: "POST",
+          headers: myHeaders,
+          body: raw,
+        });
+
+        const data = await res.json();
+        // console.log("data",data);
+        if (data.user?.role === "subscribedUser") {
+          toast.warn("You have already took the subscription", {
+            position: "top-right",
+            autoClose: 2500,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+          });
+          router.push("/");
+        }
+        setBaseUser(data.user);
+      } catch (e) {
+        toast.error(e.message || "Internal server error", {
+          position: "top-right",
+          autoClose: 2500,
+          transition: Bounce,
+        });
+      }
+    };
+
+    if (isLoaded) {
+      load();
+    }
+  }, [isLoaded]);
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  const handlePayment = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/add-payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: 500 }), // ₹500
+      });
+
+      const data = await res.json();
+      const { order } = data;
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // test key
+        amount: order.amount,
+        currency: order.currency,
+        name: "Test App",
+        description: "Test Razorpay Payment",
+        order_id: order.id,
+        handler: function (response) {
+          //   alert("Payment successful!");
+          setUpgrade();
+          console.log(response);
+        },
+        prefill: {
+          name: "Test User",
+          email: "test@example.com",
+          contact: "2388299009",
+        },
+        theme: {
+          color: "#3399cc",
+        },
+      };
+
+      const razorpayObject = new window.Razorpay(options);
+      razorpayObject.open();
+    } catch (err) {
+      toast.error("Payment Error", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+      router.push("/");
+      console.error("Payment Error:", err);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="min-h-[86vh] lg:w-[30vw]   mx-auto lg:pt-30 pt-15">
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.6 }}
+        className="bg-indigo-600 text-white p-8 rounded-2xl m-5 lg:m-0  shadow-xl border border-indigo-700"
+      >
+        <div className="flex items-center justify-center mb-4">
+          <Zap size={32} />
+        </div>
+        <h3 className="text-2xl font-semibold mb-2 text-center">Pro Plan</h3>
+        <p className="text-indigo-100 text-center mb-6">
+          Upgrade to unlock more storage and daily usage.
+        </p>
+        <ul className="text-left space-y-4 text-sm">
+          <li className="flex items-center gap-2">
+            <CheckCircle2 className="text-white" size={18} />
+            Upload up to <strong>7 PDFs</strong>
+          </li>
+          <li className="flex items-center gap-2">
+            <CheckCircle2 className="text-white" size={18} />
+            <strong>10 queries</strong> per PDF <strong>per day</strong>
+          </li>
+          <li className="flex items-center gap-2">
+            <CheckCircle2 className="text-white" size={18} />
+            Priority chat processing
+          </li>
+          <li className="flex items-center gap-2">
+            <CheckCircle2 className="text-white" size={18} />
+            Early access to new features
+          </li>
+        </ul>
+        <button
+          onClick={handlePayment}
+          disabled={loading}
+          className="mt-8 w-full flex items-center justify-center cursor-pointer py-3 bg-white text-indigo-700 font-semibold rounded-full hover:bg-gray-100 transition"
+        >
+          {loading ? "Processing..." : "Pay ₹500"}
+        </button>
+      </motion.div>
+    </div>
+  );
+}

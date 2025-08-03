@@ -10,6 +10,8 @@ import useStore from "@/lib/store";
 import Lottie from "lottie-react";
 import animationData from "@/public/Loading.json";
 import animationData2 from "@/public/Spinner.json";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const {
@@ -21,8 +23,11 @@ export default function Page() {
     setShowItems,
     showNav,
     setShowNav,
+    upgrade,
+    setUpgrade,
   } = useStore();
   const template = useRef();
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [isQuerying, setIsQuerying] = useState(false);
   const [answer, setAnswer] = useState(null);
@@ -141,6 +146,10 @@ export default function Page() {
 
         const data = await res.json();
         // console.log("data",data);
+        if (data.user.role === "subscribedUser") {
+          setUpgrade();
+          // console.log("upl");
+        }
         setBaseUser(data.user);
         setCollection(data.collections);
       } catch (e) {
@@ -175,7 +184,13 @@ export default function Page() {
       {/* Left side: Upload */}
       <div className="lg:w-[30vw] flex justify-center  border-r  border-gray-300 ">
         {isLoaded && baseUser ? (
-          <div className="w-full px-4 transition-all delay-500 pt-6 space-y-0">
+          <motion.div
+            animate={{
+              opacity: [0.1, 0.3, 0.5, 0.7, 0.8, 0.9, 1],
+            }}
+            transition={{ duration: 0.7, ease: "linear" }}
+            className="w-full px-4 transition-all delay-500 pt-6 space-y-0"
+          >
             {isMobile && !showup && (
               <Plus
                 onClick={() => setShowUp(true)}
@@ -189,13 +204,18 @@ export default function Page() {
               />
             )}
             {(!isMobile || showup) && (
-              <>
+              <motion.div
+                animate={{
+                  opacity: [0.1, 0.3, 0.5, 0.7, 0.8, 0.9, 1],
+                }}
+                transition={{ duration: 1, ease: "linear" }}
+              >
                 <div className="text-left border-b pb-3">
                   <p className="font-semibold text-gray-800 text-lg">
                     {baseUser?.name}
                   </p>
                   <p className="text-sm text-gray-500 capitalize">
-                    Role: {baseUser?.role}
+                    Role: {baseUser?.role==='subscribedUser' ? 'Premium':baseUser?.role}
                   </p>
                 </div>
 
@@ -213,7 +233,7 @@ export default function Page() {
                       </span>
                     </p>
 
-                    <div className="w-full h-4 bg-gray-200 rounded-full">
+                    <div className="w-full lg:h-3 h-2 bg-gray-200 rounded-full">
                       <div
                         className={`h-full ${
                           (baseUser?.createdCollection /
@@ -243,16 +263,34 @@ export default function Page() {
                 </div>
 
                 {/* File Upload */}
-                <div
-                  hidden={
-                    baseUser?.createdCollection === baseUser?.collectionLimit
-                  }
-                  className="border border-gray-200 rounded-md p-2"
-                >
-                  <p className="text-gray-600 text-sm p-2">Add Collection</p>
-                  <Fileupload />
-                </div>
-              </>
+                {/* File Upload or Subscribe CTA */}
+                {baseUser?.createdCollection === baseUser?.collectionLimit ? (
+                  <div className="border border-yellow-400 bg-yellow-50 p-4 rounded-md mt-3">
+                    <h3 className="text-lg font-semibold text-yellow-800 mb-1">
+                      🔒 Collection Limit Reached
+                    </h3>
+                    <p className="text-sm text-yellow-700">
+                      You've reached the maximum number of collections allowed
+                      in the free plan.
+                    </p>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      Upgrade to <span className="font-semibold">Pro</span> to
+                      increase your limits and unlock additional features.
+                    </p>
+                    <button
+                      onClick={() => router.push("/subscription")} // change as per your route
+                      className="mt-3 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition-all"
+                    >
+                      Upgrade to Pro
+                    </button>
+                  </div>
+                ) : (
+                  <div className="border border-gray-200 rounded-md p-2 mt-3">
+                    <p className="text-gray-600 text-sm p-2">Add Collection</p>
+                    <Fileupload />
+                  </div>
+                )}
+              </motion.div>
             )}
 
             {/* Collections Dropdown */}
@@ -280,7 +318,8 @@ export default function Page() {
               {showItems && (
                 <div className="border-1 absolute border-t-0 px-3 py-2 z-0 bg-gray-200 overflow-auto lg:max-w-[20vw] lg:max-h-[30vh] w-[92vw]">
                   {collections.map((col, i) => {
-                    const isLimitReached = col.used_query >= col.query_limit;
+                    const isLimitReached =
+                      col.used_query >= (upgrade ? 15 : col.query_limit);
                     return (
                       <div
                         key={col._id || i}
@@ -308,7 +347,7 @@ export default function Page() {
 
               {/* Note about disabled options */}
               {collections?.some(
-                (col) => col.used_query >= col.query_limit
+                (col) => col.used_query >= (upgrade ? 15 : col.query_limit)
               ) && (
                 <p className="text-xs text-red-500 mt-1">
                   * Some collections are exced the query limit,
@@ -319,7 +358,7 @@ export default function Page() {
                 </p>
               )}
             </div>
-          </div>
+          </motion.div>
         ) : (
           <div className="flex items-center opacity-35 fl p-4">
             <Lottie
@@ -335,25 +374,31 @@ export default function Page() {
       </div>
 
       {/* Right side: QnA */}
-      <div className="lg:w-[70vw] flex flex-col justify-between p-4">
+      <div
+        initial={{ opacity: 0.1 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="lg:w-[70vw] flex flex-col justify-between p-4"
+      >
         {/* Answer display */}
         <div className="flex justify-between">
-          <button
+          <motion.button
+            whileTap={{ scale: 1.1 }}
             onClick={() => {
               setShowChats(!showChats);
             }}
-            className="bg-blue-200 text-blue-700 hover:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 font-semibold py-1 px-2 m-1 cursor-pointer rounded-lg shadow-sm"
+            className="bg-blue-200 text-blue-700 hover:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 font-semibold py-1 px-2 m-1 cursor-pointer  shadow-sm"
           >
             {showChats ? "hide" : "show"} chats
-          </button>
+          </motion.button>
           {selectedIndex != -1 && collections && (
             <div>
               <div className="text-sm text-gray-600">
                 chat-limits : {collections[selectedIndex]?.used_query}/
-                {collections[selectedIndex]?.query_limit}{" "}
+                {upgrade ? 15 : collections[selectedIndex]?.query_limit}{" "}
               </div>
               <div className="text-xs text-gray-500 text-right">
-                resets weekly
+                resets {upgrade ? "daily" : "weekly"}
               </div>
             </div>
           )}
@@ -361,8 +406,20 @@ export default function Page() {
         <div className="border border-gray-200 rounded-xl shadow p-4 lg:h-[77vh] h-[60vh] overflow-y-auto">
           {!answer && !isQuerying && !showChats && (
             <h1 className="lg:absolute flex flex-col items-center justify-center lg:top-100 lg:ml-30    mt-30  lg:mt-0 lg:right-130 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500 lg:text-3xl text-2xl font-bold">
-              <div>Think Smarter,</div>
-              <div>Talk Better—with ChatAI</div>
+              <motion.div
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.7 }}
+              >
+                Think Smarter,
+              </motion.div>
+              <motion.div
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.7 }}
+              >
+                Talk Better—with ChatAI
+              </motion.div>
             </h1>
           )}
           {showChats && (
@@ -396,15 +453,25 @@ export default function Page() {
           {!showChats && (
             <>
               {show.length > 0 && (
-                <div className="flex justify-end mb-4">
+                <motion.div
+                  initial={{ y: 200, opacity: 0.1 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.7 }}
+                  className="flex justify-end mb-4"
+                >
                   <div className="max-w-[70%] bg-slate-300 text-left text-black p-3 rounded-l-2xl rounded-tr-2xl text-sm lg:text-lg">
                     {show}
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {/* Answer area */}
-              <div className="flex items-start gap-2 lg:text-lg text-left p-2">
+              <motion.div
+                initial={{ opacity: 0.1 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.7 }}
+                className="flex items-start gap-2 lg:text-lg text-left p-2"
+              >
                 {isQuerying && (
                   <div className="animate-pulse text-gray-500 flex items-center gap-2">
                     <Sparkles className="animate-spin-slow" />
@@ -416,7 +483,7 @@ export default function Page() {
                     <ReactMarkdown>{answer}</ReactMarkdown>
                   </div>
                 )}
-              </div>
+              </motion.div>
 
               {/* Reference Toggle */}
               {!isQuerying && referance?.length > 0 && (
@@ -452,7 +519,10 @@ export default function Page() {
         </div>
 
         {/* Input box */}
-        <div
+        <motion.div
+          initial={{ y: 100, opacity: 0.1 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.4 }}
           className={`relative ${
             showNav && "opacity-0"
           }  transition-all duration-700 flex justify-center items-center mt-4 lg:h-[8vh]`}
@@ -487,7 +557,7 @@ export default function Page() {
             placeholder="Ask something from the PDF..."
             className="border border-gray-300 rounded-2xl   px-4 py-2 lg:w-[60%] w-[95%] lg:text-lg focus:outline-none focus:ring-2 pr-10 mb-10 lg:pr-11 focus:ring-indigo-500  "
           />
-          {/* used_query >= col.query_limit */}
+          {/* used_query >= (upgrade ? 15:col.query_limit) */}
           <button
             hidden={
               selectedIndex !== -1 &&
@@ -512,17 +582,19 @@ export default function Page() {
               </svg>
             ) : (
               <Lottie
-              animationData={animationData2}
-              loop={true}
-              style={{
-                height: isMobile ? 25 : 35,
-                width: isMobile ? 25 : 35,
-              }}
-            />
+                animationData={animationData2}
+                loop={true}
+                style={{
+                  height: isMobile ? 25 : 35,
+                  width: isMobile ? 25 : 35,
+                }}
+              />
             )}
           </button>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

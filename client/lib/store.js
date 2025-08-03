@@ -4,7 +4,10 @@ const useStore = create((set, get) => ({
   showItems: false,
   showNav: false,
   collections: [],
-
+  upgrade:false,
+  setUpgrade: () => {
+    set({ upgrade: true });
+  },
   setShowItems: (i) => {
     set({ showItems: i });
   },

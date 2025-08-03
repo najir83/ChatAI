@@ -11,15 +11,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { EllipsisVertical, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { useRouter } from "next/navigation";
 import useStore from "@/lib/store";
 function Navbar() {
   const pathname = usePathname();
   const { user } = useUser();
-
+const router=useRouter();
   // const [] = useState(fal  se);
   const [isMobile, setIsMobile] = useState(false);
-  const { showItems, setShowItems,showNav, setShowNav } = useStore();
+  const { showItems, setShowItems, showNav, setShowNav } = useStore();
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 720);
     handleResize();
@@ -42,17 +42,17 @@ function Navbar() {
             <EllipsisVertical
               className="cursor-pointer transition-transform hover:scale-110"
               onClick={() => {
+                if (showItems) setShowItems(false);
 
-                if(showItems)setShowItems(false)
-                
-                setShowNav(true)}}
+                setShowNav(true);
+              }}
             />
           )}
           <Link
             href="/"
             className="text-xl lg:text-2xl font-bold ml-3 hover:text-green-800 transition-colors"
           >
-           {"<"} Chat<span className="text-green-800">AI {"/>"}</span>
+            {"<"} Chat<span className="text-green-800">AI {"/>"}</span>
           </Link>
         </div>
 
@@ -73,25 +73,36 @@ function Navbar() {
             ))}
           </div>
         )}
+        <div className="flex justify-center items-center gap-5 lg:gap-10">
+          <motion.button
+          whileTap={{
+            scale:1.15,
+            opacity:.5
+          }}
 
-        <div className="space-x-4">
-          <SignedOut>
-            <SignInButton>
-              <button className="bg-white cursor-pointer text-indigo-600 font-bold lg:px-5 lg:py-2 px-4 py-1 rounded-xl shadow hover:bg-indigo-100 transition-all duration-200">
-                Sign In
-              </button>
-            </SignInButton>
-          </SignedOut>
+             onClick={()=>router.push('/payments')}
+            className="lg:px-6 lg:py-2 font-bold cursor-pointer bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full shadow-md hover:from-blue-600 hover:to-indigo-600 transition-all duration-200"
+          >
+            Join Now
+          </motion.button>
+          <div className="space-x-4">
+            <SignedOut>
+              <SignInButton>
+                <button className="bg-white cursor-pointer text-indigo-600 font-bold lg:px-5 lg:py-2 px-4 py-1 rounded-xl shadow hover:bg-indigo-100 transition-all duration-200">
+                  Sign In
+                </button>
+              </SignInButton>
+            </SignedOut>
 
-          <SignedIn>
-            <div className="flex flex-col items-center">
-              <UserButton />
-              <p className="text-sm">{user?.fullName}</p>
-            </div>
-          </SignedIn>
+            <SignedIn>
+              <div className="flex flex-col items-center">
+                <UserButton />
+                <p className="text-sm">{user?.fullName}</p>
+              </div>
+            </SignedIn>
+          </div>
         </div>
       </div>
-
       {/* Mobile Sidebar */}
 
       <AnimatePresence>

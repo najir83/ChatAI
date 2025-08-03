@@ -11,7 +11,7 @@ const collectionSchema = new mongoose.Schema({
   },
   query_limit: {
     type: Number,
-    default: 15,
+    default: 10,
   },
   used_query: {
     type: Number,
